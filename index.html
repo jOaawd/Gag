@@ -15,17 +15,6 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    #enable-btn {
-      display: block;
-      margin: 0 auto 20px auto;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 8px;
-      border: none;
-      background-color: #4caf50;
-      color: white;
-    }
     .section {
       margin-bottom: 32px;
     }
@@ -62,6 +51,20 @@
       font-size: 12px;
       color: #666;
     }
+    #enable-btn {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #4caf50;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #enable-btn:hover {
+      background-color: #45a049;
+    }
   </style>
 </head>
 <body>
@@ -71,9 +74,8 @@
 
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
     let OneSignalInstance;
-
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
         appId: "72061545-1b26-4fc6-aefe-56f12d3ce2be",
@@ -84,9 +86,9 @@
         try {
           const isEnabled = await OneSignalInstance.isPushNotificationsEnabled();
           if (isEnabled) {
-            alert('Notifications already enabled');
+            alert('Notifications are already enabled');
           } else {
-            await OneSignalInstance.registerForPushNotifications();
+            await OneSignalInstance.showSlidedownPrompt();
             alert('Notification permission requested, please allow notifications');
           }
         } catch (error) {
@@ -104,42 +106,38 @@
     }
 
     async function fetchAndRender() {
-      try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        const container = document.getElementById("content");
-        container.innerHTML = "";
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      const container = document.getElementById("content");
+      container.innerHTML = "";
 
-        for (const section of sections) {
-          const items = data[section];
-          if (!items || !items.length) continue;
+      for (const section of sections) {
+        const items = data[section];
+        if (!items || !items.length) continue;
 
-          const sectionEl = document.createElement("div");
-          sectionEl.className = "section";
+        const sectionEl = document.createElement("div");
+        sectionEl.className = "section";
 
-          const title = document.createElement("div");
-          title.className = "section-title";
-          title.textContent = section.replace(/_/g, " ").toUpperCase();
-          sectionEl.appendChild(title);
+        const title = document.createElement("div");
+        title.className = "section-title";
+        title.textContent = section.replace("_", " ").toUpperCase();
+        sectionEl.appendChild(title);
 
-          items.forEach(item => {
-            const el = document.createElement("div");
-            el.className = "item";
+        items.forEach(item => {
+          const el = document.createElement("div");
+          el.className = "item";
 
-            el.innerHTML = `
-              <img src="${item.icon}" alt="${item.display_name}" />
-              <div class="name">${item.display_name}</div>
-              <div class="qty">Qty: ${item.quantity}</div>
-              <div class="time">${formatTime(item.Date_Start)} - ${formatTime(item.Date_End)}</div>
-            `;
+          el.innerHTML = `
+            <img src="${item.icon}" alt="${item.display_name}" />
+            <div class="name">${item.display_name}</div>
+            <div class="qty">Qty: ${item.quantity}</div>
+            <div class="time">${formatTime(item.Date_Start)} - ${formatTime(item.Date_End)}</div>
+          `;
 
-            sectionEl.appendChild(el);
-          });
+          sectionEl.appendChild(el);
+        });
 
-          container.appendChild(sectionEl);
-        }
-      } catch (err) {
-        document.getElementById("content").textContent = "Failed to load data.";
+        container.appendChild(sectionEl);
       }
     }
 

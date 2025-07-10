@@ -73,7 +73,6 @@
   <button id="enable-btn">Enable Notifications</button>
   <div id="content">Loading...</div>
 
-  <!-- OneSignal SDK v16 -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -84,15 +83,13 @@
         serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
       });
 
-      const btn = document.getElementById("enable-btn");
-
-      btn.addEventListener("click", async () => {
+      document.getElementById("enable-btn").addEventListener("click", async () => {
         try {
-          const permission = await OneSignal.notifications.permission;
+          const permission = await OneSignal.Notifications.getPermission(); // returns 'granted', 'default', or 'denied'
           if (permission === "granted") {
             alert("Notifications already enabled!");
           } else {
-            await OneSignal.notifications.requestPermission();
+            await OneSignal.Notifications.requestPermission();
             alert("Permission requested. Check your browser.");
           }
         } catch (err) {

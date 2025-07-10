@@ -16,6 +16,20 @@
       text-align: center;
       margin-bottom: 20px;
     }
+    #enable-btn {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #4caf50;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #enable-btn:hover {
+      background-color: #45a049;
+    }
     .section {
       margin-bottom: 32px;
     }
@@ -52,20 +66,6 @@
       font-size: 12px;
       color: #666;
     }
-    #enable-btn {
-      display: block;
-      margin: 0 auto 20px auto;
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      background-color: #4caf50;
-      color: white;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    #enable-btn:hover {
-      background-color: #45a049;
-    }
   </style>
 </head>
 <body>
@@ -73,28 +73,31 @@
   <button id="enable-btn">Enable Notifications</button>
   <div id="content">Loading...</div>
 
+  <!-- OneSignal SDK v16 -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
+    OneSignalDeferred.push(function (OneSignal) {
+      OneSignal.init({
         appId: "72061545-1b26-4fc6-aefe-56f12d3ce2be",
         serviceWorkerPath: "OneSignalSDKWorker.js",
         serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
       });
 
-      document.getElementById("enable-btn").addEventListener("click", async () => {
+      const btn = document.getElementById("enable-btn");
+
+      btn.addEventListener("click", async () => {
         try {
-          const enabled = await OneSignal.notifications.isPushEnabled();
-          if (enabled) {
+          const permission = await OneSignal.notifications.permission;
+          if (permission === "granted") {
             alert("Notifications already enabled!");
           } else {
             await OneSignal.notifications.requestPermission();
             alert("Permission requested. Check your browser.");
           }
-        } catch (e) {
-          alert("Error: " + e.message);
-          console.error(e);
+        } catch (err) {
+          alert("Notification error: " + err.message);
+          console.error(err);
         }
       });
     });
@@ -104,7 +107,7 @@
 
     function formatTime(iso) {
       const d = new Date(iso);
-      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
 
     async function fetchAndRender() {
@@ -126,7 +129,7 @@
           title.textContent = section.replace("_", " ").toUpperCase();
           sectionEl.appendChild(title);
 
-          items.forEach(item => {
+          items.forEach((item) => {
             const el = document.createElement("div");
             el.className = "item";
             el.innerHTML = `

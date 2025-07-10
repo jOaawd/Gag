@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>🌱 GrowAGarden Stock Viewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json" />
   <style>
     body {
       font-family: sans-serif;
@@ -82,12 +83,11 @@
         serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
       });
 
-      const btn = document.getElementById('enable-btn');
-      btn.addEventListener('click', async () => {
+      document.getElementById("enable-btn").addEventListener("click", async () => {
         try {
-          const isPushEnabled = await OneSignal.notifications.isPushEnabled();
-          if (isPushEnabled) {
-            alert("Notifications already enabled.");
+          const enabled = await OneSignal.notifications.isPushEnabled();
+          if (enabled) {
+            alert("Notifications already enabled!");
           } else {
             await OneSignal.notifications.requestPermission();
             alert("Permission requested. Check your browser.");

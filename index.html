@@ -76,23 +76,27 @@
   <script>
     let OneSignalInstance;
     window.OneSignalDeferred = window.OneSignalDeferred || [];
+
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
         appId: "72061545-1b26-4fc6-aefe-56f12d3ce2be",
+        serviceWorkerPath: "OneSignalSDKWorker.js",
+        serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
       });
       OneSignalInstance = OneSignal;
 
-      document.getElementById('enable-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('enable-btn');
+      btn.addEventListener('click', async () => {
         try {
-          const isEnabled = await OneSignalInstance.isPushNotificationsEnabled();
+          const isEnabled = await OneSignalInstance.notifications.isPushEnabled();
           if (isEnabled) {
-            alert('Notifications are already enabled');
+            alert('Notifications already enabled');
           } else {
-            await OneSignalInstance.showSlidedownPrompt();
-            alert('Notification permission requested, please allow notifications');
+            await OneSignalInstance.notifications.requestPermission();
+            alert('Permission requested – check your browser popup.');
           }
-        } catch (error) {
-          alert('Error enabling notifications: ' + error.message);
+        } catch (err) {
+          alert('Error enabling notifications: ' + err.message);
         }
       });
     });
@@ -106,38 +110,42 @@
     }
 
     async function fetchAndRender() {
-      const res = await fetch(API_URL);
-      const data = await res.json();
-      const container = document.getElementById("content");
-      container.innerHTML = "";
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        const container = document.getElementById("content");
+        container.innerHTML = "";
 
-      for (const section of sections) {
-        const items = data[section];
-        if (!items || !items.length) continue;
+        for (const section of sections) {
+          const items = data[section];
+          if (!items || !items.length) continue;
 
-        const sectionEl = document.createElement("div");
-        sectionEl.className = "section";
+          const sectionEl = document.createElement("div");
+          sectionEl.className = "section";
 
-        const title = document.createElement("div");
-        title.className = "section-title";
-        title.textContent = section.replace("_", " ").toUpperCase();
-        sectionEl.appendChild(title);
+          const title = document.createElement("div");
+          title.className = "section-title";
+          title.textContent = section.replace("_", " ").toUpperCase();
+          sectionEl.appendChild(title);
 
-        items.forEach(item => {
-          const el = document.createElement("div");
-          el.className = "item";
+          items.forEach(item => {
+            const el = document.createElement("div");
+            el.className = "item";
 
-          el.innerHTML = `
-            <img src="${item.icon}" alt="${item.display_name}" />
-            <div class="name">${item.display_name}</div>
-            <div class="qty">Qty: ${item.quantity}</div>
-            <div class="time">${formatTime(item.Date_Start)} - ${formatTime(item.Date_End)}</div>
-          `;
+            el.innerHTML = `
+              <img src="${item.icon}" alt="${item.display_name}" />
+              <div class="name">${item.display_name}</div>
+              <div class="qty">Qty: ${item.quantity}</div>
+              <div class="time">${formatTime(item.Date_Start)} - ${formatTime(item.Date_End)}</div>
+            `;
 
-          sectionEl.appendChild(el);
-        });
+            sectionEl.appendChild(el);
+          });
 
-        container.appendChild(sectionEl);
+          container.appendChild(sectionEl);
+        }
+      } catch (err) {
+        document.getElementById("content").textContent = "Failed to load stock.";
       }
     }
 

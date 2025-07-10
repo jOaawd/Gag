@@ -74,29 +74,27 @@
 
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
-    let OneSignalInstance;
     window.OneSignalDeferred = window.OneSignalDeferred || [];
-
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
         appId: "72061545-1b26-4fc6-aefe-56f12d3ce2be",
         serviceWorkerPath: "OneSignalSDKWorker.js",
         serviceWorkerUpdaterPath: "OneSignalSDKUpdaterWorker.js",
       });
-      OneSignalInstance = OneSignal;
 
       const btn = document.getElementById('enable-btn');
       btn.addEventListener('click', async () => {
         try {
-          const isEnabled = await OneSignalInstance.notifications.isPushEnabled();
-          if (isEnabled) {
-            alert('Notifications already enabled');
+          const isPushEnabled = await OneSignal.notifications.isPushEnabled();
+          if (isPushEnabled) {
+            alert("Notifications already enabled.");
           } else {
-            await OneSignalInstance.notifications.requestPermission();
-            alert('Permission requested – check your browser popup.');
+            await OneSignal.notifications.requestPermission();
+            alert("Permission requested. Check your browser.");
           }
-        } catch (err) {
-          alert('Error enabling notifications: ' + err.message);
+        } catch (e) {
+          alert("Error: " + e.message);
+          console.error(e);
         }
       });
     });
@@ -131,14 +129,12 @@
           items.forEach(item => {
             const el = document.createElement("div");
             el.className = "item";
-
             el.innerHTML = `
               <img src="${item.icon}" alt="${item.display_name}" />
               <div class="name">${item.display_name}</div>
               <div class="qty">Qty: ${item.quantity}</div>
               <div class="time">${formatTime(item.Date_Start)} - ${formatTime(item.Date_End)}</div>
             `;
-
             sectionEl.appendChild(el);
           });
 
@@ -146,6 +142,7 @@
         }
       } catch (err) {
         document.getElementById("content").textContent = "Failed to load stock.";
+        console.error(err);
       }
     }
 
